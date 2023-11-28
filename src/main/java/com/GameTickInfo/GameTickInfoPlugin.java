@@ -5,9 +5,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -34,6 +32,7 @@ public class GameTickInfoPlugin extends Plugin
 	private SelectedTile startTile;
 	private SelectedTile previousTile;
 	private SelectedTile location;
+	private SelectedTile currentTile;
 	@Inject
 	private Client client;
 	@Inject
@@ -43,27 +42,45 @@ public class GameTickInfoPlugin extends Plugin
 	@Inject
 	private OverlayManager overlayManager;
 	@Inject
-	private GameTicksOnTileOverlay overlay;
+	private GameTicksOnTileOverlay gameTicksOnTileOverlay;
+	@Inject
+	private GameTickLapsOverlay gameTickLapsOverlay;
 
 	@Override
 	protected void startUp() throws Exception
 	{
-		overlayManager.add(overlay);
+		overlayManager.add(gameTicksOnTileOverlay);
+		overlayManager.add(gameTickLapsOverlay);
 		chatCommandManager.registerCommand("!remember",this::rememberLocation);
 		chatCommandManager.registerCommand("!check",this::checkLocation);
+		chatCommandManager.registerCommand("!clear",this::clearMemory);
+		chatCommandManager.registerCommand("!forget",this::forgetLocation);
 	}
-
-
-
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		overlayManager.remove(overlay);
+		overlayManager.remove(gameTicksOnTileOverlay);
+		overlayManager.remove(gameTickLapsOverlay);
 		chatCommandManager.unregisterCommand("!remember");
 		chatCommandManager.unregisterCommand("!check");
+		chatCommandManager.unregisterCommand("!clear");
+		chatCommandManager.unregisterCommand("!forget");
+	}
+	private void forgetLocation(ChatMessage chatMessage, String s) {
+		if(rememberedTiles.contains(currentTile)) {
+			rememberedTiles.remove(currentTile);
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile removed from memory",null);
+		}
+		else {
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile was not in memory",null);
+		}
 	}
 
+	private void clearMemory(ChatMessage chatMessage, String s) {
+		rememberedTiles.clear();
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Memory has been cleared",null);
+	}
 	private void rememberLocation(ChatMessage chatMessage, String s) {
 		if(!rememberedTiles.contains(new SelectedTile(client.getLocalPlayer().getWorldLocation()))) {
             rememberedTiles.add(new SelectedTile(client.getLocalPlayer().getWorldLocation()));
@@ -84,12 +101,13 @@ public class GameTickInfoPlugin extends Plugin
 			}
 		}
 		if (!checkSuccess){
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile not in memory",null);
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile is not in memory",null);
 		}
 	}
 
 	@Subscribe
 	public void onClientTick(ClientTick clientTick) {
+		currentTile = new SelectedTile(client.getLocalPlayer().getWorldLocation());
 		WorldPoint currentTile = client.getLocalPlayer().getWorldLocation();
 		int currentLocX = currentTile.getX();
 		int currentLocY = currentTile.getY();

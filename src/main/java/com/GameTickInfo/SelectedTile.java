@@ -14,7 +14,12 @@ public class SelectedTile {
     public int getY(){
         return thisLocation.getY();
     }
-    public boolean equals(SelectedTile comparedTile) {
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        SelectedTile comparedTile = (SelectedTile) obj;
         return this.getX() == comparedTile.getX() && this.getY() == comparedTile.getY();
     }
 }
