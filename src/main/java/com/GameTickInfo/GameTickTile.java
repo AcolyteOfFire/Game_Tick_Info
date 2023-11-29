@@ -2,24 +2,28 @@ package com.GameTickInfo;
 
 import net.runelite.api.coords.WorldPoint;
 
-public class SelectedTile {
-    private final WorldPoint thisLocation;
+public class GameTickTile {
+    private final WorldPoint worldPoint;
 
-    SelectedTile(WorldPoint worldPoint){
-        thisLocation = worldPoint;
+    GameTickTile(WorldPoint worldPoint){
+        this.worldPoint = worldPoint;
     }
     public int getX(){
-        return thisLocation.getX();
+        return worldPoint.getX();
     }
     public int getY(){
-        return thisLocation.getY();
+        return worldPoint.getY();
+    }
+
+    public WorldPoint getWorldPoint() {
+        return worldPoint;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        SelectedTile comparedTile = (SelectedTile) obj;
+        GameTickTile comparedTile = (GameTickTile) obj;
         return this.getX() == comparedTile.getX() && this.getY() == comparedTile.getY();
     }
 }

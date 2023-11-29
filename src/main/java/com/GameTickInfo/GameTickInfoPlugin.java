@@ -5,7 +5,10 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.MenuAction;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.Tile;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -14,25 +17,29 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.chat.ChatCommandManager;
-
+import net.runelite.client.input.KeyListener;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Slf4j
 @PluginDescriptor(
 	name = "Game Tick Info"
 )
-public class GameTickInfoPlugin extends Plugin
+public class GameTickInfoPlugin extends Plugin implements KeyListener
 {
 	public static int timeOnTile = 0;
 	public static int gameTickOnTile = 0;
-	private final List<SelectedTile> rememberedTiles = new ArrayList<>();
+	public final List<GameTickTile> rememberedTiles = new ArrayList<>();
 	public int prevLocX;
 	public int prevLocY;
-	private SelectedTile startTile;
-	private SelectedTile previousTile;
-	private SelectedTile location;
-	private SelectedTile currentTile;
+	private GameTickTile startTile;
+	private GameTickTile previousTile;
+	private GameTickTile location;
+	private GameTickTile currentTile;
+	private boolean shiftHeld = false;
+
 	@Inject
 	private Client client;
 	@Inject
@@ -45,16 +52,19 @@ public class GameTickInfoPlugin extends Plugin
 	private GameTicksOnTileOverlay gameTicksOnTileOverlay;
 	@Inject
 	private GameTickLapsOverlay gameTickLapsOverlay;
+	@Inject MarkedTilesOverlay markedTilesOverlay;
 
 	@Override
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(gameTicksOnTileOverlay);
 		overlayManager.add(gameTickLapsOverlay);
+		overlayManager.add(markedTilesOverlay);
 		chatCommandManager.registerCommand("!remember",this::rememberLocation);
 		chatCommandManager.registerCommand("!check",this::checkLocation);
 		chatCommandManager.registerCommand("!clear",this::clearMemory);
 		chatCommandManager.registerCommand("!forget",this::forgetLocation);
+		client.getCanvas().addKeyListener(this);
 	}
 
 	@Override
@@ -62,11 +72,33 @@ public class GameTickInfoPlugin extends Plugin
 	{
 		overlayManager.remove(gameTicksOnTileOverlay);
 		overlayManager.remove(gameTickLapsOverlay);
+		overlayManager.remove(markedTilesOverlay);
 		chatCommandManager.unregisterCommand("!remember");
 		chatCommandManager.unregisterCommand("!check");
 		chatCommandManager.unregisterCommand("!clear");
 		chatCommandManager.unregisterCommand("!forget");
+		client.getCanvas().removeKeyListener(this);
 	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+			shiftHeld = true;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+			shiftHeld = false;
+		}
+	}
+
 	private void forgetLocation(ChatMessage chatMessage, String s) {
 		if(rememberedTiles.contains(currentTile)) {
 			rememberedTiles.remove(currentTile);
@@ -81,9 +113,13 @@ public class GameTickInfoPlugin extends Plugin
 		rememberedTiles.clear();
 		client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Memory has been cleared",null);
 	}
+	private void clearMemory(){
+		rememberedTiles.clear();
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Memory has been cleared",null);
+	}
 	private void rememberLocation(ChatMessage chatMessage, String s) {
-		if(!rememberedTiles.contains(new SelectedTile(client.getLocalPlayer().getWorldLocation()))) {
-            rememberedTiles.add(new SelectedTile(client.getLocalPlayer().getWorldLocation()));
+		if(!rememberedTiles.contains(new GameTickTile(client.getLocalPlayer().getWorldLocation()))) {
+            rememberedTiles.add(new GameTickTile(client.getLocalPlayer().getWorldLocation()));
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile added to memory",null);
 		}
 		else{
@@ -91,9 +127,9 @@ public class GameTickInfoPlugin extends Plugin
 		}
 	}
 	private void checkLocation(ChatMessage chatMessage, String s) {
-		SelectedTile currentLocation = new SelectedTile(client.getLocalPlayer().getWorldLocation());
+		GameTickTile currentLocation = new GameTickTile(client.getLocalPlayer().getWorldLocation());
 		boolean checkSuccess=false;
-		for (SelectedTile tile: rememberedTiles
+		for (GameTickTile tile: rememberedTiles
 			 ) {
 			if(currentLocation.equals(tile)){
 				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","This tile is remembered!",null);
@@ -104,10 +140,13 @@ public class GameTickInfoPlugin extends Plugin
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile is not in memory",null);
 		}
 	}
+	public Collection<GameTickTile> getRememberedTiles(){
+		return this.rememberedTiles;
+	}
 
 	@Subscribe
 	public void onClientTick(ClientTick clientTick) {
-		currentTile = new SelectedTile(client.getLocalPlayer().getWorldLocation());
+		currentTile = new GameTickTile(client.getLocalPlayer().getWorldLocation());
 		WorldPoint currentTile = client.getLocalPlayer().getWorldLocation();
 		int currentLocX = currentTile.getX();
 		int currentLocY = currentTile.getY();
@@ -120,6 +159,28 @@ public class GameTickInfoPlugin extends Plugin
 		}
 		prevLocX=currentLocX;
 		prevLocY=currentLocY;
+	}
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded event) {
+		if (shiftHeld&&event.getOption().equals("Walk here")) {
+			Tile selectedSceneTile = this.client.getSelectedSceneTile();
+			if (selectedSceneTile == null){
+				return;
+			}
+			this.client.createMenuEntry(-1).setOption("Mark/Unmark Start Zone").setTarget("Tile").setType(MenuAction.RUNELITE).onClick((e)->{
+				Tile target = this.client.getSelectedSceneTile();
+				if(target != null){
+					GameTickTile targetGameTickTile = new GameTickTile(target.getWorldLocation()) ;
+					if(!rememberedTiles.contains(targetGameTickTile)){
+						rememberedTiles.add(targetGameTickTile);
+					}
+					else{
+						rememberedTiles.remove(targetGameTickTile);
+					}
+				}
+			});
+
+		}
 	}
 
 	@Provides
