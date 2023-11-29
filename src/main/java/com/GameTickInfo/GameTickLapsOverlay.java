@@ -36,7 +36,7 @@ public class GameTickLapsOverlay extends OverlayPanel{
             String totalLaps = String.valueOf(GameTickInfoPlugin.totalLaps);
 
             if (currentLap.equals("-1")) {
-                currentLap = "Not started";
+                currentLap = "~~~";
             }
 
             gameTickLapsPanelComponent.getChildren().clear();
@@ -46,7 +46,7 @@ public class GameTickLapsOverlay extends OverlayPanel{
                         .color(Color.WHITE)
                         .build());
                 gameTickLapsPanelComponent.getChildren().add(LineComponent.builder()
-                        .left("Lap Time: ")
+                        .left("Current Lap: ")
                         .leftColor(Color.WHITE)
                         .right(currentLap)
                         .rightColor(Color.GREEN)
