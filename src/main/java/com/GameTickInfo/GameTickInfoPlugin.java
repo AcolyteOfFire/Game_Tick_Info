@@ -34,6 +34,7 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 	public static int lapStartTime=-1;
 	public static int currentLapTime=-1;
 	public static int previousLap = -1;
+	public static int totalLaps = 0;
 	public final List<GameTickTile> rememberedTiles = new ArrayList<>();
 
 	private GameTickTile startTile;
@@ -66,8 +67,11 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		chatCommandManager.registerCommand("!check",this::checkLocation);
 		chatCommandManager.registerCommand("!clear",this::clearMemory);
 		chatCommandManager.registerCommand("!forget",this::forgetLocation);
+		chatCommandManager.registerCommand("!reset",this::resetLapCounter);
 		client.getCanvas().addKeyListener(this);
 	}
+
+
 
 	@Override
 	protected void shutDown() throws Exception
@@ -79,6 +83,7 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		chatCommandManager.unregisterCommand("!check");
 		chatCommandManager.unregisterCommand("!clear");
 		chatCommandManager.unregisterCommand("!forget");
+		chatCommandManager.unregisterCommand("!reset");
 		client.getCanvas().removeKeyListener(this);
 	}
 
@@ -100,7 +105,10 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 			shiftHeld = false;
 		}
 	}
-
+	private void resetLapCounter(ChatMessage chatMessage, String s) {
+		totalLaps=0;
+		resetCurrentLapTime();
+	}
 	private void forgetLocation(ChatMessage chatMessage, String s) {
 		if(rememberedTiles.contains(currentTile)) {
 			rememberedTiles.remove(currentTile);
@@ -165,6 +173,7 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		if(rememberedTiles.contains(currentTile)){
 			if(currentLapTime!=-1){
 				previousLap=currentLapTime;
+				totalLaps++;
 			}
 			resetCurrentLapTime();
 		}
@@ -179,6 +188,7 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		if(rememberedTiles.isEmpty()){
 			resetCurrentLapTime();
 			previousLap = -1;
+			totalLaps = 0;
 		}
 
 

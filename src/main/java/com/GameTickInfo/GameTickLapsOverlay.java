@@ -33,6 +33,7 @@ public class GameTickLapsOverlay extends OverlayPanel{
         if(config.displayGameTickLaps()) {
             String currentLap = String.valueOf(GameTickInfoPlugin.currentLapTime);
             String previousLap = String.valueOf(GameTickInfoPlugin.previousLap);
+            String totalLaps = String.valueOf(GameTickInfoPlugin.totalLaps);
 
             if (currentLap.equals("-1")) {
                 currentLap = "Not started";
@@ -41,8 +42,8 @@ public class GameTickLapsOverlay extends OverlayPanel{
             gameTickLapsPanelComponent.getChildren().clear();
             if (config.displayGameTickLaps()) {
                 gameTickLapsPanelComponent.getChildren().add(TitleComponent.builder()
-                        .text("Laps")
-                        .color(Color.GREEN)
+                        .text("Lap Information")
+                        .color(Color.WHITE)
                         .build());
                 gameTickLapsPanelComponent.getChildren().add(LineComponent.builder()
                         .left("Lap Time: ")
@@ -50,7 +51,8 @@ public class GameTickLapsOverlay extends OverlayPanel{
                         .right(currentLap)
                         .rightColor(Color.GREEN)
                         .build());
-                if (!previousLap.equals("-1")) {
+                if (!previousLap.equals("-1"))
+                {
                     gameTickLapsPanelComponent.getChildren().add(LineComponent.builder()
                             .left("Previous Lap: ")
                             .leftColor(Color.WHITE)
@@ -59,12 +61,22 @@ public class GameTickLapsOverlay extends OverlayPanel{
                             .build()
                     );
                 }
+                if (!totalLaps.equals("0"))
+                {
+                    gameTickLapsPanelComponent.getChildren().add(LineComponent.builder()
+                            .left("Total Laps: ")
+                            .leftColor(Color.WHITE)
+                            .rightColor(Color.GREEN)
+                            .right(totalLaps)
+                            .build()
+                    );
+                }
                 gameTickLapsPanelComponent.setPreferredSize(new Dimension(graphics.getFontMetrics()
                         .stringWidth(String.valueOf("Previous Lap: ")) + 10 + (Math.max(graphics
                         .getFontMetrics()
                         .stringWidth(previousLap), graphics.getFontMetrics().stringWidth(currentLap))), 0));
+                }
             }
-        }
         return gameTickLapsPanelComponent.render(graphics);
     }
 }
