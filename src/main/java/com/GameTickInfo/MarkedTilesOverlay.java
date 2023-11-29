@@ -34,17 +34,19 @@ public class MarkedTilesOverlay extends Overlay{
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        final Collection<GameTickTile> startTiles = plugin.getRememberedTiles();
-        if(startTiles.isEmpty()){
-            return null;
-        }
-        Stroke stroke = new BasicStroke((float) config.borderWidth());
-        for(GameTickTile startTile: startTiles){
-            WorldPoint worldPoint = startTile.getWorldPoint();
-            if(worldPoint.getPlane() != client.getPlane()){
-                continue;
+        if(config.displayGameTickLaps()) {
+            final Collection<GameTickTile> startTiles = plugin.getRememberedTiles();
+            if (startTiles.isEmpty()) {
+                return null;
             }
-            drawTile(graphics,worldPoint,stroke);
+            Stroke stroke = new BasicStroke((float) config.borderWidth());
+            for (GameTickTile startTile : startTiles) {
+                WorldPoint worldPoint = startTile.getWorldPoint();
+                if (worldPoint.getPlane() != client.getPlane()) {
+                    continue;
+                }
+                drawTile(graphics, worldPoint, stroke);
+            }
         }
         return null;
     }

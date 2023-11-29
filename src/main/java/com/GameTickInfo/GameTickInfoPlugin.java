@@ -31,9 +31,11 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 {
 	public static int timeOnTile = 0;
 	public static int gameTickOnTile = 0;
+	public static int lapStartTime=-1;
+	public static int currentLapTime=-1;
+	public static int previousLap = -1;
 	public final List<GameTickTile> rememberedTiles = new ArrayList<>();
-	public int prevLocX;
-	public int prevLocY;
+
 	private GameTickTile startTile;
 	private GameTickTile previousTile;
 	private GameTickTile location;
@@ -143,25 +145,48 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 	public Collection<GameTickTile> getRememberedTiles(){
 		return this.rememberedTiles;
 	}
+	private void resetCurrentLapTime(){
+		lapStartTime = -1;
+		currentLapTime = -1;
+	}
 
 	@Subscribe
 	public void onClientTick(ClientTick clientTick) {
+		//logic for game tick on tile counter
 		currentTile = new GameTickTile(client.getLocalPlayer().getWorldLocation());
-		WorldPoint currentTile = client.getLocalPlayer().getWorldLocation();
-		int currentLocX = currentTile.getX();
-		int currentLocY = currentTile.getY();
-		if(currentLocX==prevLocX&&currentLocY==prevLocY){
+		if(currentTile.equals(previousTile)){
 			timeOnTile = client.getTickCount()-gameTickOnTile-1;
 		}
 		else{
 			timeOnTile = 0;
 			gameTickOnTile= client.getTickCount();
 		}
-		prevLocX=currentLocX;
-		prevLocY=currentLocY;
+		//logic for the lap timer
+		if(rememberedTiles.contains(currentTile)){
+			if(currentLapTime!=-1){
+				previousLap=currentLapTime;
+			}
+			resetCurrentLapTime();
+		}
+		//begin lap when you leave the start tile
+		if(!rememberedTiles.contains(currentTile)&&rememberedTiles.contains(previousTile)){
+			lapStartTime = client.getTickCount();
+		}
+		if(lapStartTime!=-1){
+			currentLapTime = client.getTickCount()-lapStartTime;
+		}
+		//reset lap counter if there are no start tiles
+		if(rememberedTiles.isEmpty()){
+			resetCurrentLapTime();
+			previousLap = -1;
+		}
+
+
+		previousTile=currentTile;
 	}
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event) {
+		if(!config.displayGameTickLaps()) return;
 		if (shiftHeld&&event.getOption().equals("Walk here")) {
 			Tile selectedSceneTile = this.client.getSelectedSceneTile();
 			if (selectedSceneTile == null){
