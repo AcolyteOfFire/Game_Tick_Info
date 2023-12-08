@@ -3,18 +3,15 @@ package com.GameTickInfo;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.MenuAction;
+import net.runelite.api.*;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.MenuEntryAdded;
-import net.runelite.api.Tile;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.chat.ChatCommandManager;
 import net.runelite.client.input.KeyListener;
@@ -31,6 +28,8 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 {
 	public static int timeOnTile = 0;
 	public static int gameTickOnTile = 0;
+	public static int timeSinceCycleStart;
+	public static int gameTickOnCycleStart;
 	public static int lapStartTime=-1;
 	public static int currentLapTime=-1;
 	public static int previousLap = -1;
@@ -55,7 +54,11 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 	private GameTicksOnTileOverlay gameTicksOnTileOverlay;
 	@Inject
 	private GameTickLapsOverlay gameTickLapsOverlay;
-	@Inject MarkedTilesOverlay markedTilesOverlay;
+	@Inject
+	private MarkedTilesOverlay markedTilesOverlay;
+	@Inject
+	private GameTickCycleOverlay gameTickCycleOverlay;
+
 
 	@Override
 	protected void startUp() throws Exception
@@ -63,6 +66,7 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		overlayManager.add(gameTicksOnTileOverlay);
 		overlayManager.add(gameTickLapsOverlay);
 		overlayManager.add(markedTilesOverlay);
+		overlayManager.add(gameTickCycleOverlay);
 		chatCommandManager.registerCommand("!remember",this::rememberLocation);
 		chatCommandManager.registerCommand("!check",this::checkLocation);
 		chatCommandManager.registerCommand("!clear",this::clearMemory);
@@ -79,6 +83,7 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		overlayManager.remove(gameTicksOnTileOverlay);
 		overlayManager.remove(gameTickLapsOverlay);
 		overlayManager.remove(markedTilesOverlay);
+		overlayManager.remove(gameTickCycleOverlay);
 		chatCommandManager.unregisterCommand("!remember");
 		chatCommandManager.unregisterCommand("!check");
 		chatCommandManager.unregisterCommand("!clear");
@@ -190,9 +195,17 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 			previousLap = -1;
 			totalLaps = 0;
 		}
-
-
 		previousTile=currentTile;
+	}
+	@Subscribe
+	public void onGameTick(GameTick event){
+		//Game Tick Cycle Logic
+		if(timeSinceCycleStart>=config.gameTicksPerCycle()){
+			timeSinceCycleStart = 1;
+		}
+		else{
+			timeSinceCycleStart++;
+		}
 	}
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event) {

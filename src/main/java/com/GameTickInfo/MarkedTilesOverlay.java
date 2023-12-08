@@ -39,7 +39,8 @@ public class MarkedTilesOverlay extends Overlay{
             if (startTiles.isEmpty()) {
                 return null;
             }
-            Stroke stroke = new BasicStroke((float) config.borderWidth());
+            float[] dash1 = {3f,0f,3f};
+            Stroke stroke = new BasicStroke((float) config.borderWidth(),BasicStroke.CAP_BUTT,BasicStroke.JOIN_MITER,10,dash1,1);
             for (GameTickTile startTile : startTiles) {
                 WorldPoint worldPoint = startTile.getWorldPoint();
                 if (worldPoint.getPlane() != client.getPlane()) {

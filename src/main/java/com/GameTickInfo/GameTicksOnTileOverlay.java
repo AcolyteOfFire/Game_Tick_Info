@@ -31,7 +31,7 @@ public class GameTicksOnTileOverlay extends OverlayPanel{
         if( config.displayGameTicksOnTile()){
             gameTicksOnTilePanelComponent.getChildren().add(TitleComponent.builder()
                     .text(String.valueOf(GameTickInfoPlugin.timeOnTile))
-                    .color(Color.GREEN)
+                    .color(config.gameTicksOnTileColor())
                     .build()
             );
             gameTicksOnTilePanelComponent.setPreferredSize(new Dimension(graphics.getFontMetrics().stringWidth(String.valueOf(GameTickInfoPlugin.timeOnTile))+10,0));
