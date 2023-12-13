@@ -65,10 +65,6 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		overlayManager.add(gameTickLapsOverlay);
 		overlayManager.add(gameTicksOnTileOverlay);
 		overlayManager.add(gameTickCycleOverlay);
-		chatCommandManager.registerCommand("!remember",this::rememberLocation);
-		chatCommandManager.registerCommand("!clear",this::clearMemory);
-		chatCommandManager.registerCommand("!forget",this::forgetLocation);
-		chatCommandManager.registerCommand("!reset",this::resetLapCounter);
 		client.getCanvas().addKeyListener(this);
 	}
 
@@ -81,10 +77,6 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		overlayManager.remove(gameTickLapsOverlay);
 		overlayManager.remove(markedTilesOverlay);
 		overlayManager.remove(gameTickCycleOverlay);
-		chatCommandManager.unregisterCommand("!remember");
-		chatCommandManager.unregisterCommand("!clear");
-		chatCommandManager.unregisterCommand("!forget");
-		chatCommandManager.unregisterCommand("!reset");
 		client.getCanvas().removeKeyListener(this);
 	}
 
@@ -104,36 +96,6 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
 			shiftHeld = false;
-		}
-	}
-	private void resetLapCounter(ChatMessage chatMessage, String s) {
-		totalLaps=0;
-		resetCurrentLapTime();
-	}
-	private void forgetLocation(ChatMessage chatMessage, String s) {
-		if(rememberedTiles.contains(currentTile)) {
-			rememberedTiles.remove(currentTile);
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile removed from memory",null);
-		}
-		else {
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile was not in memory",null);
-		}
-	}
-	public void clearMemory(ChatMessage chatMessage, String s) {
-		rememberedTiles.clear();
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Memory has been cleared",null);
-	}
-	void clearMemory(){
-		rememberedTiles.clear();
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Memory has been cleared",null);
-	}
-	private void rememberLocation(ChatMessage chatMessage, String s) {
-		if(!rememberedTiles.contains(new GameTickTile(client.getLocalPlayer().getWorldLocation()))) {
-            rememberedTiles.add(new GameTickTile(client.getLocalPlayer().getWorldLocation()));
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile added to memory",null);
-		}
-		else{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile is already in memory",null);
 		}
 	}
 
