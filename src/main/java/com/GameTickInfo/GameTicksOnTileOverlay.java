@@ -3,6 +3,7 @@ import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
+import net.runelite.api.MenuAction;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 
@@ -29,8 +30,10 @@ public class GameTicksOnTileOverlay extends OverlayPanel{
     {
         gameTicksOnTilePanelComponent.getChildren().clear();
         if( config.displayGameTicksOnTile()){
+            String valueToDisplay = String.valueOf(GameTickInfoPlugin.timeOnTile);
+            if(!config.startTicksOnTileAtZero()) valueToDisplay = String.valueOf(GameTickInfoPlugin.timeOnTile+1);
             gameTicksOnTilePanelComponent.getChildren().add(TitleComponent.builder()
-                    .text(String.valueOf(GameTickInfoPlugin.timeOnTile))
+                    .text(valueToDisplay)
                     .color(config.gameTicksOnTileColor())
                     .build()
             );

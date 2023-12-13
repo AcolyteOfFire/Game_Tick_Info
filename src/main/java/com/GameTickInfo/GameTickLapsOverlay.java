@@ -5,9 +5,13 @@ import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TextComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
+import net.runelite.api.MenuAction;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import java.awt.*;
+
+import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
+
 public class GameTickLapsOverlay extends OverlayPanel{
     private final GameTickInfoConfig config;
     private final Client client;
@@ -22,6 +26,7 @@ public class GameTickLapsOverlay extends OverlayPanel{
         this.config = config;
         this.client = client;
         this.plugin = plugin;
+        addMenuEntry(MenuAction.RUNELITE_OVERLAY, "Reset", "Game Tick Laps", e -> plugin.rememberedTiles.clear());
         setPosition(OverlayPosition.TOP_LEFT);
         isResizable();
     }

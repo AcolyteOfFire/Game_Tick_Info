@@ -22,7 +22,8 @@ import java.util.List;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Game Tick Info"
+	name = "Game Tick Info",
+	description = "Displays game tick counters, and lets you mark tiles to track laps"
 )
 public class GameTickInfoPlugin extends Plugin implements KeyListener
 {
@@ -63,9 +64,9 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 	@Override
 	protected void startUp() throws Exception
 	{
-		overlayManager.add(gameTicksOnTileOverlay);
-		overlayManager.add(gameTickLapsOverlay);
 		overlayManager.add(markedTilesOverlay);
+		overlayManager.add(gameTickLapsOverlay);
+		overlayManager.add(gameTicksOnTileOverlay);
 		overlayManager.add(gameTickCycleOverlay);
 		chatCommandManager.registerCommand("!remember",this::rememberLocation);
 		chatCommandManager.registerCommand("!check",this::checkLocation);
@@ -123,12 +124,11 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile was not in memory",null);
 		}
 	}
-
-	private void clearMemory(ChatMessage chatMessage, String s) {
+	public void clearMemory(ChatMessage chatMessage, String s) {
 		rememberedTiles.clear();
 		client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Memory has been cleared",null);
 	}
-	private void clearMemory(){
+	void clearMemory(){
 		rememberedTiles.clear();
 		client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Memory has been cleared",null);
 	}

@@ -33,7 +33,7 @@ public class GameTickCycleOverlay extends OverlayPanel{
             timeToDisplay = String.valueOf(GameTickInfoPlugin.timeSinceCycleStart - 1);
         }
         GameTickCyclePanelComponent.getChildren().clear();
-        if( config.displayGameTicksOnTile()){
+        if( config.displayGameTicksSinceCycleStart()){
             GameTickCyclePanelComponent.getChildren().add(TitleComponent.builder()
                     .text(timeToDisplay)
                     .color(config.gameTicksCycleColor())
