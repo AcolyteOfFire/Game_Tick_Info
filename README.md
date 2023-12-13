@@ -1,5 +1,5 @@
 # Game Tick Info Plugin
-Features a number of tools to help track time for tick manipulation skilling methods, such as 3Tick gem mining, or 2Tick swordfish fishing.
+Features a number of tools to help track time for tick manipulation skilling methods such as 3Tick gem mining, or 2Tick swordfish fishing.
 ## Time on Tile counter:
 Shows how long you have been standing on a tile
 ## Game Tick Cycle:
