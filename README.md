@@ -15,4 +15,4 @@ Also includes chat commands[^2]:
 - !clear removes all start tiles
 
 [^1]:'Shift + Rightclick' on the info box for the option to clear all of the marked tiles and reset the counter.
-[^2]:All of the command functionality can be accessed through the in game interfaces
+[^2]:All of the command functionality can be accessed through the in game interface
