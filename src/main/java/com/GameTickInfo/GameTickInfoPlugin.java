@@ -23,23 +23,20 @@ import java.util.List;
 @Slf4j
 @PluginDescriptor(
 	name = "Game Tick Info",
-	description = "Displays game tick counters, and lets you mark tiles to track laps"
+	description = "Displays game tick counters and lets you mark tiles to track laps"
 )
 public class GameTickInfoPlugin extends Plugin implements KeyListener
 {
 	public static int timeOnTile = 0;
 	public static int gameTickOnTile = 0;
 	public static int timeSinceCycleStart;
-	public static int gameTickOnCycleStart;
 	public static int lapStartTime=-1;
 	public static int currentLapTime=-1;
 	public static int previousLap = -1;
 	public static int totalLaps = 0;
 	public final List<GameTickTile> rememberedTiles = new ArrayList<>();
 
-	private GameTickTile startTile;
 	private GameTickTile previousTile;
-	private GameTickTile location;
 	private GameTickTile currentTile;
 	private boolean shiftHeld = false;
 
@@ -69,7 +66,6 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		overlayManager.add(gameTicksOnTileOverlay);
 		overlayManager.add(gameTickCycleOverlay);
 		chatCommandManager.registerCommand("!remember",this::rememberLocation);
-		chatCommandManager.registerCommand("!check",this::checkLocation);
 		chatCommandManager.registerCommand("!clear",this::clearMemory);
 		chatCommandManager.registerCommand("!forget",this::forgetLocation);
 		chatCommandManager.registerCommand("!reset",this::resetLapCounter);
@@ -86,7 +82,6 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 		overlayManager.remove(markedTilesOverlay);
 		overlayManager.remove(gameTickCycleOverlay);
 		chatCommandManager.unregisterCommand("!remember");
-		chatCommandManager.unregisterCommand("!check");
 		chatCommandManager.unregisterCommand("!clear");
 		chatCommandManager.unregisterCommand("!forget");
 		chatCommandManager.unregisterCommand("!reset");
@@ -141,20 +136,7 @@ public class GameTickInfoPlugin extends Plugin implements KeyListener
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile is already in memory",null);
 		}
 	}
-	private void checkLocation(ChatMessage chatMessage, String s) {
-		GameTickTile currentLocation = new GameTickTile(client.getLocalPlayer().getWorldLocation());
-		boolean checkSuccess=false;
-		for (GameTickTile tile: rememberedTiles
-			 ) {
-			if(currentLocation.equals(tile)){
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","This tile is remembered!",null);
-				checkSuccess=true;
-			}
-		}
-		if (!checkSuccess){
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Tile is not in memory",null);
-		}
-	}
+
 	public Collection<GameTickTile> getRememberedTiles(){
 		return this.rememberedTiles;
 	}

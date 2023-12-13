@@ -9,7 +9,6 @@ import net.runelite.api.MenuAction;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import java.awt.*;
-
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 
 public class GameTickLapsOverlay extends OverlayPanel{
@@ -77,7 +76,7 @@ public class GameTickLapsOverlay extends OverlayPanel{
                     );
                 }
                 gameTickLapsPanelComponent.setPreferredSize(new Dimension(graphics.getFontMetrics()
-                        .stringWidth(String.valueOf("Previous Lap: ")) + 10 + (Math.max(graphics
+                        .stringWidth("Previous Lap: ") + 10 + (Math.max(graphics
                         .getFontMetrics()
                         .stringWidth(previousLap), graphics.getFontMetrics().stringWidth(currentLap))), 0));
                 }
